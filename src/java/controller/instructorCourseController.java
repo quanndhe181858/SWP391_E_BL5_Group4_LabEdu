@@ -1,0 +1,60 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
+ */
+package controller;
+
+import jakarta.servlet.ServletConfig;
+import java.io.IOException;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import service.categoryServices;
+import service.courseSectionServices;
+import service.courseServices;
+
+/**
+ *
+ * @author quan
+ */
+@WebServlet(name = "instructorCourseController", urlPatterns = {
+    "/instructor/courses"
+})
+public class instructorCourseController extends HttpServlet {
+
+    private categoryServices _categoryService;
+    private courseSectionServices _courseSectionService;
+    private courseServices _courseService;
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        _categoryService = new categoryServices();
+        _courseSectionService = new courseSectionServices();
+        _courseService = new courseServices();
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+    }
+    
+}
