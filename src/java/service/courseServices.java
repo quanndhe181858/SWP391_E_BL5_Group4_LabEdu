@@ -7,6 +7,7 @@ package service;
 import dao.CourseDAO;
 import java.sql.Date;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.Course;
 
@@ -20,25 +21,44 @@ public class CourseServices {
     private CourseDAO cDao = new CourseDAO();
 
     public Course createCourse(Course c, int uid) {
-        boolean ok = cDao.isValid(c);
+        try {
+            boolean ok = cDao.isValid(c);
+            if (ok) {
+                return cDao.createCourse(c, uid);
+            }
 
-        if (ok) {
-            return cDao.createCourse(c, uid);
+            return null;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            return null;
         }
-
-        return null;
     }
 
     public Course getCourseById(int id) {
-        return cDao.getCourseById(id);
+        try {
+            return cDao.getCourseById(id);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            return null;
+        }
     }
 
     public boolean deleteCourse(int id) {
-        return cDao.deleteCourse(id);
+        try {
+            return cDao.deleteCourse(id);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            return false;
+        }
     }
 
     public List<Course> getListCourse(int limit, int offset, String title, String description, int categoryId,
             String status, Date start, Date end) {
-        return cDao.getCourses(limit, offset, title, description, categoryId, status, start, end);
+        try {
+            return cDao.getCourses(limit, offset, title, description, categoryId, status, start, end);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            return null;
+        }
     }
 }

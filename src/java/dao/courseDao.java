@@ -5,7 +5,6 @@
 package dao;
 
 import database.dao;
-import java.sql.Timestamp;
 import java.sql.SQLException;
 import model.Course;
 import java.util.logging.Logger;
