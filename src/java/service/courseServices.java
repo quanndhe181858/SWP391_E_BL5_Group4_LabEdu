@@ -5,7 +5,7 @@
 package service;
 
 import dao.CourseDAO;
-import java.sql.Timestamp;
+import java.sql.Date;
 import java.util.List;
 import java.util.logging.Logger;
 import model.Course;
@@ -38,7 +38,7 @@ public class CourseServices {
     }
 
     public List<Course> getListCourse(int limit, int offset, String title, String description, int categoryId,
-            String status, Timestamp start, Timestamp end) {
+            String status, Date start, Date end) {
         return cDao.getCourses(limit, offset, title, description, categoryId, status, start, end);
     }
 }

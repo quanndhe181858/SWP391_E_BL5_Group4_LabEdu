@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.sql.Date;
 import java.util.List;
 
 /**
@@ -29,29 +30,30 @@ public class CourseDAO extends dao {
     public static void main(String[] args) {
         CourseDAO dao = new CourseDAO();
 
-        Course c = new Course();
-        c.setTitle("Java Web Development");
-        c.setDescription("Learn MVC, Servlet, JDBC");
-        c.setStatus("active");
-        c.setCategory_id(2);
-
-        Course created = dao.createCourse(c, 1); // uid = 1 (creator)
-        System.out.println("Created Course:");
-        System.out.println(created);
-
-        Course found = dao.getCourseById(created.getId());
-        System.out.println("Found Course:");
-        System.out.println(found);
-
-        found.setTitle("Updated Java Web Development");
-        found.setStatus("inactive");
-
-        Course updated = dao.updateCourse(found, 1); // uid = 1 (updater)
-        System.out.println("Updated Course:");
-        System.out.println(updated);
-
-        boolean deleted = dao.deleteCourse(updated.getId());
-        System.out.println("Deleted? " + deleted);
+//        Course c = new Course();
+//        c.setTitle("Java Web Development");
+//        c.setDescription("Learn MVC, Servlet, JDBC");
+//        c.setStatus("active");
+//        c.setCategory_id(2);
+//
+//        Course created = dao.createCourse(c, 1); // uid = 1 (creator)
+//        System.out.println("Created Course:");
+//        System.out.println(created);
+//
+//        Course found = dao.getCourseById(created.getId());
+//        System.out.println("Found Course:");
+//        System.out.println(found);
+//
+//        found.setTitle("Updated Java Web Development");
+//        found.setStatus("inactive");
+//
+//        Course updated = dao.updateCourse(found, 1); // uid = 1 (updater)
+//        System.out.println("Updated Course:");
+//        System.out.println(updated);
+//
+//        boolean deleted = dao.deleteCourse(updated.getId());
+//        System.out.println("Deleted? " + deleted);
+        System.out.println(dao.getCourses(0, 0, "", "", 0, "", null, null));
     }
 
     public Course createCourse(Course course, int uid) {
@@ -271,7 +273,7 @@ public class CourseDAO extends dao {
     }
 
     public List<Course> getCourses(int limit, int offset, String title, String description,
-            int categoryId, String status, Timestamp start, Timestamp end) {
+            int categoryId, String status, Date start, Date end) {
 
         List<Course> cList = new ArrayList<>();
 
@@ -343,7 +345,7 @@ public class CourseDAO extends dao {
                 cList.add(c);
             }
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             this.log(Level.SEVERE, "Error in getCourses()", e);
         } finally {
             this.closeResources();
