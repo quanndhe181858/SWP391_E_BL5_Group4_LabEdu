@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-package controller;
+package controller.instructor;
 
 import constant.httpStatus;
 import jakarta.servlet.ServletConfig;
@@ -21,6 +21,7 @@ import service.CourseServices;
 import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.Map;
+import util.AuthUtils;
 
 /**
  *
@@ -38,6 +39,7 @@ public class InstructorCourseController extends HttpServlet {
 
     @Override
     public void init(ServletConfig config) throws ServletException {
+        super.init(config);
         _categoryService = new CategoryServices();
         _courseSectionService = new CourseSectionServices();
         _courseService = new CourseServices();
@@ -56,7 +58,7 @@ public class InstructorCourseController extends HttpServlet {
         try {
             String qs = req.getQueryString();
             User user = (User) session.getAttribute("user");
-            this.doAuthorize(req, resp, user);
+            AuthUtils.doAuthorize(req, resp, user, 2);
 
             if (qs == null) {
                 this.getListCourses(req, resp);
@@ -83,8 +85,10 @@ public class InstructorCourseController extends HttpServlet {
 
         try {
             User user = (User) session.getAttribute("user");
-
-            this.doAuthorize(req, resp, user);
+            AuthUtils.doAuthorize(req, resp, user, 2);
+            
+            
+            
         } catch (ServletException | IOException e) {
             resp.setStatus(500);
             res.put("success", false);
@@ -106,7 +110,7 @@ public class InstructorCourseController extends HttpServlet {
 
         try {
             User user = (User) session.getAttribute("user");
-            this.doAuthorize(req, resp, user);
+            AuthUtils.doAuthorize(req, resp, user, 2);
 
             String courseIdStr = req.getParameter("cid");
 
@@ -158,7 +162,7 @@ public class InstructorCourseController extends HttpServlet {
 
         try {
             User user = (User) session.getAttribute("user");
-            this.doAuthorize(req, resp, user);
+            AuthUtils.doAuthorize(req, resp, user, 2);
         } catch (ServletException | IOException e) {
             resp.setStatus(500);
             res.put("success", false);
@@ -201,14 +205,6 @@ public class InstructorCourseController extends HttpServlet {
         }
 
         req.getRequestDispatcher("../View/Instructor/CourseDetail.jsp").forward(req, resp);
-    }
-
-    protected void doAuthorize(HttpServletRequest req, HttpServletResponse resp, User u)
-            throws ServletException, IOException {
-        if (u.getRole_id() != 2) {
-            resp.sendError(httpStatus.FORBIDDEN.getCode(), httpStatus.FORBIDDEN.getMessage());
-            return;
-        }
     }
 
     public void sendJsonResponse(HttpServletResponse response, Object data) throws IOException {
