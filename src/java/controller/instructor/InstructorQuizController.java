@@ -265,7 +265,7 @@ public class InstructorQuizController extends HttpServlet {
         request.setAttribute("startItem", startItem);
         request.setAttribute("endItem", endItem);
 
-        request.getRequestDispatcher("../View/Instructor/quizList.jsp").forward(request, response);
+        request.getRequestDispatcher("../View/Instructor/QuizList.jsp").forward(request, response);
     }
 
     /**
@@ -309,7 +309,7 @@ public class InstructorQuizController extends HttpServlet {
      */
     private void showCreateForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("../View/Instructor/addQuiz.jsp").forward(request, response);
+        request.getRequestDispatcher("../View/Instructor/AddQuiz.jsp").forward(request, response);
     }
 
     /**
@@ -362,19 +362,19 @@ public class InstructorQuizController extends HttpServlet {
         // Validate input
         if (question == null || question.trim().isEmpty()) {
             request.setAttribute("error", "Question is required.");
-            request.getRequestDispatcher("../View/Instructor/addQuiz.jsp").forward(request, response);
+            request.getRequestDispatcher("../View/Instructor/AddQuiz.jsp").forward(request, response);
             return;
         }
 
         if (type == null || type.trim().isEmpty()) {
             request.setAttribute("error", "Question type is required.");
-            request.getRequestDispatcher("../View/Instructor/addQuiz.jsp").forward(request, response);
+            request.getRequestDispatcher("../View/Instructor/AddQuiz.jsp").forward(request, response);
             return;
         }
 
         if (categoryIdParam == null || categoryIdParam.trim().isEmpty()) {
             request.setAttribute("error", "Category is required.");
-            request.getRequestDispatcher("../View/Instructor/addQuiz.jsp").forward(request, response);
+            request.getRequestDispatcher("../View/Instructor/AddQuiz.jsp").forward(request, response);
             return;
         }
 
@@ -383,7 +383,7 @@ public class InstructorQuizController extends HttpServlet {
             categoryId = Integer.parseInt(categoryIdParam);
         } catch (NumberFormatException e) {
             request.setAttribute("error", "Invalid category ID.");
-            request.getRequestDispatcher("../View/Instructor/addQuiz.jsp").forward(request, response);
+            request.getRequestDispatcher("../View/Instructor/AddQuiz.jsp").forward(request, response);
             return;
         }
 
@@ -409,7 +409,7 @@ public class InstructorQuizController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
         } else {
             request.setAttribute("error", "Failed to create quiz. Please try again.");
-            request.getRequestDispatcher("../View/Instructor/addQuiz.jsp").forward(request, response);
+            request.getRequestDispatcher("../View/Instructor/AddQuiz.jsp").forward(request, response);
         }
     }
 
