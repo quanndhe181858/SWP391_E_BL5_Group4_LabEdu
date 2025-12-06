@@ -20,6 +20,8 @@ import service.CourseServices;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import model.Category;
 import util.AuthUtils;
 import util.ResponseUtils;
 
@@ -52,7 +54,7 @@ public class InstructorCourseController extends HttpServlet {
             String qs = req.getQueryString();
             User user = AuthUtils.doAuthorize(req, resp, 2);
 
-            if (qs == null) {
+            if (qs == null || qs.contains("page")) {
                 this.getListCourses(req, resp, user);
             } else {
                 this.getCourseDetail(req, resp, user);
@@ -185,12 +187,33 @@ public class InstructorCourseController extends HttpServlet {
                 endItem = totalCourses;
             }
 
+            if (totalCourses <= 0) {
+                startItem = totalCourses;
+            }
+
+            List<Category> categories = _categoryService.getCategories();
+
+            List<Category> parentCategories = categories.stream()
+                    .filter(c -> c.getParent_id() == 0)
+                    .collect(Collectors.toList());
+
+            List<Category> childCategories = categories.stream()
+                    .filter(c -> c.getParent_id() != 0)
+                    .collect(Collectors.toList());
+
+            req.setAttribute("parents", parentCategories);
+            req.setAttribute("children", childCategories);
+
             req.setAttribute("page", page);
             req.setAttribute("courseList", courseList);
             req.setAttribute("totalPages", totalPages);
             req.setAttribute("startItem", startItem);
             req.setAttribute("endItem", endItem);
             req.setAttribute("totalCourses", totalCourses);
+
+            req.setAttribute("parents", parentCategories);
+            req.setAttribute("children", childCategories);
+
             req.getRequestDispatcher("../View/Instructor/CourseList.jsp").forward(req, resp);
         } catch (IOException e) {
             resp.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
