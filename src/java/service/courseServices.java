@@ -4,11 +4,12 @@
  */
 package service;
 
+import dao.CategoryDAO;
 import dao.CourseDAO;
-import java.sql.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import model.Category;
 import model.Course;
 
 /**
@@ -19,6 +20,7 @@ public class CourseServices {
 
     private final Logger logger = Logger.getLogger(this.getClass().getName());
     private CourseDAO cDao = new CourseDAO();
+    private CategoryDAO categoryDao = new CategoryDAO();
 
     public Course createCourse(Course c, int uid) {
         try {
@@ -53,12 +55,49 @@ public class CourseServices {
     }
 
     public List<Course> getListCourse(int limit, int offset, String title, String description, int categoryId,
-            String status, Date start, Date end) {
+            String status, String sortBy) {
         try {
-            return cDao.getCourses(limit, offset, title, description, categoryId, status, start, end);
+            return cDao.getCourses(limit, offset, title, description, categoryId, status, sortBy);
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             return null;
+        }
+    }
+
+    public List<Course> getListCourseByInstructorId(int limit, int offset, String title, String description, int categoryId,
+            String status, String sortBy, int instructorId) {
+        try {
+            List<Course> cList = cDao.getCoursesByInstructorId(limit, offset, title, description, categoryId, status, sortBy, instructorId);
+
+            for (Course course : cList) {
+                Category c = categoryDao.getCategoryById(course.getCategory_id());
+                course.setCategory(c);
+            }
+
+            return cList;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            return null;
+        }
+    }
+
+    public int countCourses(String title, String description,
+            int categoryId, String status) {
+        try {
+            return cDao.countCourses(title, description, categoryId, status);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            return 0;
+        }
+    }
+
+    public int countCoursesByInstructorId(String title, String description,
+            int categoryId, String status, int instructorId) {
+        try {
+            return cDao.countCoursesByInstructorId(title, description, categoryId, status, instructorId);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            return 0;
         }
     }
 }

@@ -5,6 +5,7 @@
 package controller.instructor;
 
 import constant.httpStatus;
+import constant.paging;
 import jakarta.servlet.ServletConfig;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -12,13 +13,12 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import model.Course;
 import model.User;
 import service.CategoryServices;
 import service.CourseServices;
-import com.google.gson.Gson;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import util.AuthUtils;
 import util.ResponseUtils;
@@ -46,14 +46,16 @@ public class InstructorCourseController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        AuthUtils.createAndSetDummyUser(req, resp);
+
         try {
             String qs = req.getQueryString();
             User user = AuthUtils.doAuthorize(req, resp, 2);
 
             if (qs == null) {
-                this.getListCourses(req, resp);
+                this.getListCourses(req, resp, user);
             } else {
-                this.getCourseDetail(req, resp);
+                this.getCourseDetail(req, resp, user);
             }
 
         } catch (ServletException | IOException e) {
@@ -127,7 +129,7 @@ public class InstructorCourseController extends HttpServlet {
 
         try {
             User user = AuthUtils.doAuthorize(req, resp, 2);
-            
+
         } catch (ServletException | IOException e) {
             resp.setStatus(500);
             res.put("success", false);
@@ -137,12 +139,65 @@ public class InstructorCourseController extends HttpServlet {
         ResponseUtils.sendJsonResponse(resp, res);
     }
 
-    protected void getListCourses(HttpServletRequest req, HttpServletResponse resp)
+    protected void getListCourses(HttpServletRequest req, HttpServletResponse resp, User user)
             throws ServletException, IOException {
-        req.getRequestDispatcher("../View/Instructor/CourseList.jsp").forward(req, resp);
+        try {
+            String pageStr = req.getParameter("page");
+            String search = req.getParameter("search");
+            String categoryIdStr = req.getParameter("filterCategoryId");
+            String status = req.getParameter("status");
+            String sortBy = req.getParameter("sortBy");
+
+            int instructorId = user.getId();
+
+            int page = paging.DEFAULT_PAGE;
+            int filterCategoryId = 0;
+
+            if (pageStr != null && !pageStr.isBlank()) {
+                try {
+                    page = Integer.parseInt(pageStr);
+                } catch (NumberFormatException e) {
+                    resp.sendError(httpStatus.BAD_REQUEST.getCode(), httpStatus.BAD_REQUEST.getMessage());
+                    return;
+                }
+            }
+
+            if (categoryIdStr != null && !categoryIdStr.isBlank()) {
+                try {
+                    filterCategoryId = Integer.parseInt(categoryIdStr);
+                } catch (NumberFormatException e) {
+                    resp.sendError(httpStatus.BAD_REQUEST.getCode(), httpStatus.BAD_REQUEST.getMessage());
+                    return;
+                }
+            }
+
+            int offset = (page - 1) * paging.INSTRUCTOR_COURSE_LIST_ITEM_PER_PAGE;
+
+            List<Course> courseList = _courseService.getListCourseByInstructorId(paging.INSTRUCTOR_COURSE_LIST_ITEM_PER_PAGE, offset, search, search, filterCategoryId, status, sortBy, instructorId);
+            int totalCourses = _courseService.countCoursesByInstructorId(search, search, filterCategoryId, status, instructorId);
+
+            int totalPages = (int) Math.ceil((double) totalCourses / paging.INSTRUCTOR_COURSE_LIST_ITEM_PER_PAGE);
+
+            int startItem = ++offset;
+            int endItem = startItem + paging.INSTRUCTOR_COURSE_LIST_ITEM_PER_PAGE - 1;
+
+            if (endItem > totalCourses) {
+                endItem = totalCourses;
+            }
+
+            req.setAttribute("page", page);
+            req.setAttribute("courseList", courseList);
+            req.setAttribute("totalPages", totalPages);
+            req.setAttribute("startItem", startItem);
+            req.setAttribute("endItem", endItem);
+            req.setAttribute("totalCourses", totalCourses);
+            req.getRequestDispatcher("../View/Instructor/CourseList.jsp").forward(req, resp);
+        } catch (IOException e) {
+            resp.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
+        }
     }
 
-    protected void getCourseDetail(HttpServletRequest req, HttpServletResponse resp)
+    protected void getCourseDetail(HttpServletRequest req, HttpServletResponse resp, User user)
             throws ServletException, IOException {
         String courseIdStr = req.getParameter("cid");
 
@@ -161,6 +216,11 @@ public class InstructorCourseController extends HttpServlet {
         }
 
         Course c = _courseService.getCourseById(courseId);
+
+        if (c.getCreated_by() != user.getId()) {
+            resp.sendError(httpStatus.FORBIDDEN.getCode(), httpStatus.FORBIDDEN.getMessage());
+            return;
+        }
 
         if (c == null || c.getUuid().isBlank()) {
             resp.sendError(httpStatus.NOT_FOUND.getCode(), httpStatus.NOT_FOUND.getMessage());
